@@ -5,6 +5,8 @@
 node_modules/
 dist/
 *.db
+*.db-shm
+*.db-wal
 *.db-journal
 *.log
 .DS_Store
