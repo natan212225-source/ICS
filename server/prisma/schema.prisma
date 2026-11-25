@@ -1,0 +1,215 @@
+// Default: SQLite file (permanent, zero-setup). For PostgreSQL/MySQL change provider + DATABASE_URL, then `npm run db`.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Branch {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique
+  code    String  @unique
+  region  String  @default("")
+  isHead  Boolean @default(false)
+  users   User[]
+  backed  BackedCustomer[]
+  lost    LostItem[]
+  cases   CaseRegister[]
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String   @default("")
+  permissions String
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  users       User[]
+}
+
+model User {
+  id        Int              @id @default(autoincrement())
+  username  String           @unique
+  fullName  String
+  password  String
+  suspended Boolean          @default(false)
+  failedAttempts Int          @default(0)
+  lockedUntil    DateTime?
+  passwordVersion Int         @default(0)
+  passwordUpdatedAt DateTime @default(now())
+  passwordMustChange Boolean @default(false)
+  deletedAt DateTime?
+  roleId    Int
+  branchId  Int
+  role      Role             @relation(fields: [roleId], references: [id])
+  branch    Branch           @relation(fields: [branchId], references: [id])
+  backed    BackedCustomer[]
+  lost      LostItem[]
+  cases     CaseRegister[]
+  caseAudits CaseAudit[]
+  refreshSessions RefreshSession[]
+}
+
+model RefreshSession {
+  id        String   @id
+  tokenHash String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  ip        String   @default("")
+  userAgent String   @default("")
+  createdAt DateTime @default(now())
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model BackedCustomer {
+  id         Int      @id @default(autoincrement())
+  firstName  String
+  middleName String   @default("")
+  lastName   String
+  age        Int
+  photo      String   @default("") // base64 data URL, stored permanently
+  requestNumber String @default("")
+  attachments String @default("[]")
+  reasons    String   // comma separated
+  addrType   String   // Region | City
+  region     String
+  zone       String   @default("")
+  woreda     String   @default("")
+  kebele     String   @default("")
+  status     String   @default("SUBMITTED") // SUBMITTED PENDING_EDIT_APPROVAL EDIT_APPROVED PENDING_CANCEL_APPROVAL CANCELLED
+  createdAt  DateTime @default(now())
+  createdAtGC String
+  createdAtEC String
+  userId     Int
+  branchId   Int
+  user       User     @relation(fields: [userId], references: [id])
+  branch     Branch   @relation(fields: [branchId], references: [id])
+}
+
+model LostItem {
+  id               Int      @id @default(autoincrement())
+  firstName        String
+  middleName       String   @default("")
+  lastName         String   @default("")
+  sex              String
+  phone            String   @default("")
+  addrType         String
+  region           String
+  zone             String   @default("")
+  woreda           String   @default("")
+  kebele           String   @default("")
+  itemType         String
+  itemNo           String   @default("")
+  details          String   @default("")
+  photo            String   @default("")
+  attachments      String   @default("[]")
+  status           String   @default("NOT_TAKEN") // TAKEN NOT_TAKEN OLD
+  claimant         String   @default("")
+  claimantPhoto    String   @default("")
+  handoverPhoto    String   @default("")
+  handoverCapturedAt DateTime?
+  collectedAt      DateTime?
+  ownershipConfirmedBy String @default("")
+  ownershipConfirmedAt DateTime?
+  takenAtGC        String   @default("")
+  takenAtEC        String   @default("")
+  createdAt        DateTime @default(now())
+  registeredDateGC String
+  registeredDateEC String
+  userId           Int
+  branchId         Int
+  user             User     @relation(fields: [userId], references: [id])
+  branch           Branch   @relation(fields: [branchId], references: [id])
+
+  @@index([itemNo])
+}
+
+model ApprovalRequest {
+  id           Int      @id @default(autoincrement())
+  recordId     Int
+  type         String // EDIT | CANCEL | LOST_STATUS
+  payload      String // JSON {before, changes}
+  reason       String   @default("")
+  status       String   @default("PENDING") // PENDING ADMIN_APPROVED APPROVED REJECTED
+  requestedBy  Int
+  branchId     Int
+  approvedBy   String   @default("")
+  approvalAtGC String   @default("")
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id     Int    @id @default(autoincrement())
+  userId Int
+  action String
+  detail String
+  ip     String
+  atGC   String
+  atEC   String
+}
+
+model CaseType {
+  id            Int            @id @default(autoincrement())
+  name          String         @unique
+  description   String         @default("")
+  requestPattern String        @default("^[A-Z0-9][A-Z0-9-]{2,49}$")
+  active        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  cases         CaseRegister[]
+}
+
+model CaseRegister {
+  id             Int        @id @default(autoincrement())
+  fullName       String
+  requestNumber  String
+  sex            String
+  region         String
+  zone           String     @default("")
+  caseTypeId     Int
+  caseType       CaseType   @relation(fields: [caseTypeId], references: [id])
+  subReason      String     @default("")
+  status         String     @default("Open")
+  remarks        String     @default("")
+  documentName   String     @default("")
+  documentPath   String     @default("")
+  documentMime   String     @default("")
+  createdAt      DateTime   @default(now())
+  createdAtGC    String
+  createdAtEC    String
+  updatedAt      DateTime   @updatedAt
+  updatedAtGC    String     @default("")
+  updatedAtEC    String     @default("")
+  userId         Int
+  branchId       Int
+  user           User       @relation(fields: [userId], references: [id])
+  branch         Branch     @relation(fields: [branchId], references: [id])
+  audits         CaseAudit[]
+
+  @@unique([caseTypeId, requestNumber])
+  @@index([branchId, caseTypeId, status])
+  @@index([requestNumber])
+  @@index([region, zone])
+}
+
+model CaseAudit {
+  id        Int      @id @default(autoincrement())
+  caseId    Int
+  case      CaseRegister @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  beforeJson String  @default("{}")
+  afterJson  String  @default("{}")
+  ip        String   @default("")
+  atGC      String
+  atEC      String
+  createdAt DateTime @default(now())
+
+  @@index([caseId, createdAt])
+}

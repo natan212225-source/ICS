@@ -1,0 +1,130 @@
+{
+ "Afar": [
+  "Awsi Rasu (Zone 1)",
+  "Kilbet Rasu (Zone 2)",
+  "Gabi Rasu (Zone 3)",
+  "Fanti Rasu (Zone 4)",
+  "Hari Rasu (Zone 5)",
+  "Mahi Rasu",
+  "Argobba (Special Woreda)"
+ ],
+ "Amhara": [
+  "Agew Awi",
+  "East Gojjam",
+  "West Gojjam",
+  "North Gojjam",
+  "North Gondar",
+  "Central Gondar",
+  "West Gondar",
+  "South Gondar",
+  "North Wollo",
+  "South Wollo",
+  "Wag Hemra",
+  "North Shewa",
+  "Oromia Special Zone",
+  "Bahir Dar Special Zone",
+  "Wolkait Tegede Setit Humera"
+ ],
+ "Benishangul-Gumuz": [
+  "Assosa",
+  "Kamashi",
+  "Metekel",
+  "Mao Komo (Special)"
+ ],
+ "Central Ethiopia": [
+  "East Gurage Zone",
+  "Gurage Zone",
+  "Hadiya Zone",
+  "Halaba Zone",
+  "Kembata Zone",
+  "Silt’e Zone",
+  "Yem Zone",
+  "Kebena Special Woreda",
+  "Mareko Special Woreda",
+  "Tembaro Special Woreda"
+ ],
+ "Gambela": [
+  "Anywaa (Anuak)",
+  "Nuer",
+  "Majang (Mezhenger)",
+  "Itang Special"
+ ],
+ "Harari": [
+  "Harari"
+ ],
+ "Oromia": [
+  "Arsi",
+  "West Arsi",
+  "Bale",
+  "East Bale",
+  "Borana",
+  "East Borana",
+  "East Hararghe",
+  "West Hararghe",
+  "East Shewa",
+  "North Shewa",
+  "Southwest Shewa",
+  "West Shewa",
+  "East Welega",
+  "West Welega",
+  "Horo Guduru Welega",
+  "Kelem Welega",
+  "Illubabor",
+  "Jimma",
+  "Guji",
+  "West Guji",
+  "East Guji",
+  "Adama Special Zone",
+  "Sheger City Administration"
+ ],
+ "Sidama": [
+  "Central Sidama Zone",
+  "Eastern Sidama Zone",
+  "Northern Sidama Zone",
+  "Southern Sidama Zone",
+  "Hawassa City Administration"
+ ],
+ "Somali": [
+  "Afder",
+  "Dollo (Wardheer)",
+  "Fafan (Jijiga)",
+  "Jarar (Degehabur)",
+  "Korahe",
+  "Liben",
+  "Nogob (Fiq)",
+  "Shabelle",
+  "Sitti (Shinile)",
+  "Erer"
+ ],
+ "South Ethiopia": [
+  "Wolayita Zone",
+  "Gamo Zone",
+  "Gofa Zone",
+  "Gedeo Zone",
+  "South Omo Zone",
+  "Ari Zone",
+  "Konso Zone",
+  "Gardula Zone",
+  "Burji Zone",
+  "Koore (Amaro) Zone",
+  "Basketo Zone",
+  "Ale Zone"
+ ],
+ "South West Ethiopia Peoples’": [
+  "Bench Sheko",
+  "Dawro",
+  "Keffa",
+  "Sheka",
+  "West Omo",
+  "Konta Zone"
+ ],
+ "Tigray": [
+  "Central Tigray",
+  "Eastern Tigray",
+  "Northwestern Tigray",
+  "Southern Tigray",
+  "Southeastern Tigray",
+  "Western Tigray",
+  "Mekelle Special Zone"
+ ]
+}
