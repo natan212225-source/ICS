@@ -12,13 +12,18 @@ const S=process.env.JWT_SECRET, db=new PrismaClient(), app=express();
 if(!S||S.length<64)throw new Error('JWT_SECRET must be set to at least 64 characters');
 if(process.env.NODE_ENV==='production'&&process.env.JWT_SECRET==='change-me-in-production')throw new Error('A production JWT_SECRET is required');
 const isProduction=process.env.NODE_ENV==='production';
-const allowedOrigins=(process.env.CORS_ORIGINS||'http://127.0.0.1:5173,http://localhost:5173,https://ics-a7pc3x5t7-natan-9e2c.vercel.app').split(',').map(s=>s.trim()).filter(Boolean);
+const configuredOrigins=(process.env.CORS_ORIGINS||'http://127.0.0.1:5173,http://localhost:5173,https://ics-a7pc3x5t7-natan-9e2c.vercel.app').split(',').map(s=>s.trim()).filter(Boolean);
+const allowedOrigins=(origin:string|null)=>{
+ if(!origin)return true;
+ if(configuredOrigins.includes(origin))return true;
+ return /^https:\/\/([a-z0-9-]+\.)*vercel\.app$/i.test(origin);
+};
 applyPlugin(jsPDF);
 app.disable('x-powered-by');
 app.set('trust proxy',1);
 app.use((q,r,n)=>{r.setHeader('X-Content-Type-Options','nosniff');r.setHeader('Referrer-Policy','no-referrer');r.setHeader('X-Frame-Options','DENY');r.setHeader('Permissions-Policy','camera=(self),microphone=(),geolocation=()');r.setHeader('Content-Security-Policy',"default-src 'self'; img-src 'self' data: blob:; media-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");if(isProduction)r.setHeader('Strict-Transport-Security','max-age=31536000; includeSubDomains');n();});
 app.use(cors({origin:(origin,cb)=>{
- if(!origin||allowedOrigins.includes(origin)) return cb(null,true);
+ if(allowedOrigins(origin)) return cb(null,true);
  cb(null,false);
 },credentials:true,methods:['GET','POST','PUT','PATCH','DELETE'],allowedHeaders:['Content-Type','Authorization','X-ICS-CSRF']}));
 app.use(express.json({limit:'8mb'}));
@@ -41,8 +46,8 @@ const adminMutationLimit=(q:any,r:any,n:any)=>{
  n();
 };
 const getCookie=(q:any,name:string)=>String(q.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith(name+'='))?.slice(name.length+1)||'';
-const cookie=(name:string,value:string,maxAge:number)=>`${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Strict${isProduction?'; Secure':''}; Max-Age=${maxAge}`;
-const clearCookie=(name:string)=>`${name}=; Path=/; HttpOnly; SameSite=Strict${isProduction?'; Secure':''}; Max-Age=0`;
+const cookie=(name:string,value:string,maxAge:number)=>`${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=${isProduction?'None':'Strict'}${isProduction?'; Secure':''}; Max-Age=${maxAge}`;
+const clearCookie=(name:string)=>`${name}=; Path=/; HttpOnly; SameSite=${isProduction?'None':'Strict'}${isProduction?'; Secure':''}; Max-Age=0`;
 const hashToken=(token:string)=>crypto.createHash('sha256').update(token).digest('hex');
 const passwordPolicy=(password:string)=>password.length>=14&&/[a-z]/.test(password)&&/[A-Z]/.test(password)&&/[0-9]/.test(password)&&/[^A-Za-z0-9]/.test(password);
 const parseJsonObject=(value:unknown,fallback:any={})=>{
@@ -109,7 +114,7 @@ app.use('/api',(q,r,n)=>{
  if(!['GET','HEAD','OPTIONS'].includes(q.method)){
   if(q.headers['x-ics-csrf']!=='1')return r.status(403).json({error:'Forbidden'});
   const origin=q.headers.origin;
-  if(origin&&allowedOrigins.length&&!allowedOrigins.includes(String(origin)))return r.status(403).json({error:'Forbidden'});
+  if(origin&&!allowedOrigins(String(origin)))return r.status(403).json({error:'Forbidden'});
  }
  n();
 });
