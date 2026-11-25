@@ -12,7 +12,7 @@ const S=process.env.JWT_SECRET, db=new PrismaClient(), app=express();
 if(!S||S.length<64)throw new Error('JWT_SECRET must be set to at least 64 characters');
 if(process.env.NODE_ENV==='production'&&process.env.JWT_SECRET==='change-me-in-production')throw new Error('A production JWT_SECRET is required');
 const isProduction=process.env.NODE_ENV==='production';
-const allowedOrigins=(process.env.CORS_ORIGINS||'http://127.0.0.1:5173,http://localhost:5173').split(',').map(s=>s.trim()).filter(Boolean);
+const allowedOrigins=(process.env.CORS_ORIGINS||'http://127.0.0.1:5173,http://localhost:5173,https://ics-a7pc3x5t7-natan-9e2c.vercel.app').split(',').map(s=>s.trim()).filter(Boolean);
 applyPlugin(jsPDF);
 app.disable('x-powered-by');
 app.set('trust proxy',1);

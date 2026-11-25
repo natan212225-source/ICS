@@ -1,10 +1,10 @@
-// Default: SQLite file (permanent, zero-setup). For PostgreSQL/MySQL change provider + DATABASE_URL, then `npm run db`.
+// Production PostgreSQL. Local development can use SQLite by temporarily changing provider and DATABASE_URL.
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

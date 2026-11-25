@@ -1,14 +1,17 @@
 let accessToken='';
 let refreshPromise:Promise<string>|null=null;
 
+const configuredApiUrl=(import.meta.env.VITE_API_URL||'https://ics-fullstack-r9pn.onrender.com').trim().replace(/\/+$/,'');
+export const apiUrl=(path:string)=>`${configuredApiUrl}/api${path}`;
+
 export const getToken=()=>accessToken;
 export const setToken=(token:string)=>{accessToken=token};
 export const clearToken=()=>{accessToken=''};
 
 export async function api(path:string,options:any={}) {
  const request=async()=>{
-  return fetch('/api'+path,{
-   method:options.method||'GET',credentials:'same-origin',
+  return fetch(apiUrl(path),{
+   method:options.method||'GET',credentials:'include',
    headers:{'Content-Type':'application/json','X-ICS-CSRF':'1',...(accessToken?{Authorization:'Bearer '+accessToken}:{})},
    body:options.body&&JSON.stringify(options.body)
   });
@@ -27,7 +30,7 @@ export async function api(path:string,options:any={}) {
  if(response.status===401&&!path.startsWith('/login')&&!path.startsWith('/refresh')&&!path.startsWith('/logout')){
   if(!refreshPromise){
    refreshPromise=(async()=>{
-    const refresh=await fetch('/api/refresh',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','X-ICS-CSRF':'1'}});
+    const refresh=await fetch(apiUrl('/refresh'),{method:'POST',credentials:'include',headers:{'Content-Type':'application/json','X-ICS-CSRF':'1'}});
     if(!refresh.ok)throw new Error('Session expired');
     const data=await refresh.json().catch(()=>({}));
     if(!data.token)throw new Error('Session expired');
