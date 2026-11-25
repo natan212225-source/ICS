@@ -19,7 +19,7 @@ for(const n in R)await db.role.upsert({
  create:{name:n,description:n==='SUPER_ADMIN'?'System administrator with complete access':n==='ADMIN'?'Administrator with approval and management access':n==='System Case Register Officer'?'Creates and manages case register records':'System role',permissions:serializePermissions(R[n]),isSystem:true}
 });
 const sa=await db.role.findUnique({where:{name:'SUPER_ADMIN'}});
-await db.user.upsert({where:{username:'admin'},update:{password:bcrypt.hashSync(bootstrapPassword,12),passwordVersion:{increment:1},failedAttempts:0,lockedUntil:null},create:{username:'admin',fullName:'Super Admin',password:bcrypt.hashSync(bootstrapPassword,12),roleId:sa!.id,branchId:hq.id}});
+await db.user.upsert({where:{username:'admin'},update:{password:bcrypt.hashSync(bootstrapPassword,12),failedAttempts:0,lockedUntil:null},create:{username:'admin',fullName:'Super Admin',password:bcrypt.hashSync(bootstrapPassword,12),roleId:sa!.id,branchId:hq.id}});
 const CASE_TYPES=[
  'Perso stuck','Document ordered stuck','Existence of key value','Perso fail','Approved files with their hitlist (after approval)',
  'Watchlist adjudication','Legacy data adjudication (customer had a passport before and applies as new ordinary)',
@@ -29,3 +29,4 @@ const CASE_TYPES=[
 ];
 for(const name of CASE_TYPES) await db.caseType.upsert({where:{name},update:{active:true},create:{name,description:''}});
 console.log('Seeded the configured bootstrap administrator.');
+await db.$disconnect();

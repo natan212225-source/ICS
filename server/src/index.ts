@@ -11,11 +11,6 @@ declare module 'jspdf' {
 const S=process.env.JWT_SECRET, db=new PrismaClient(), app=express();
 if(!S||S.length<64)throw new Error('JWT_SECRET must be set to at least 64 characters');
 if(process.env.NODE_ENV==='production'&&process.env.JWT_SECRET==='change-me-in-production')throw new Error('A production JWT_SECRET is required');
-const configureDatabase=async()=>{
- await db.$queryRawUnsafe('PRAGMA busy_timeout = 30000');
- await db.$queryRawUnsafe('PRAGMA synchronous = NORMAL');
- await db.$queryRawUnsafe('PRAGMA journal_mode = WAL');
-};
 const isProduction=process.env.NODE_ENV==='production';
 const allowedOrigins=(process.env.CORS_ORIGINS||'http://127.0.0.1:5173,http://localhost:5173').split(',').map(s=>s.trim()).filter(Boolean);
 applyPlugin(jsPDF);
@@ -415,7 +410,7 @@ const caseSchema=z.object({
  documentName:z.string().trim().max(255).optional(),
  documentData:z.string().optional()
 });
-const uploadDir=path.resolve(process.cwd(),'uploads');
+const uploadDir=path.resolve(process.env.UPLOAD_DIR||path.join(process.cwd(),'uploads'));
 fs.mkdirSync(uploadDir,{recursive:true});
 const saveCaseDocument=(name:string,data:string)=>{
  const m=/^data:(application\/pdf|image\/jpeg|image\/png);base64,(.+)$/s.exec(data||'');
@@ -766,9 +761,5 @@ app.get('/api/report',can('export'),W(async(q:any,r:any)=>{const {mod='backed',p
   d.autoTable({head:[cols],body:rows.map(x=>cols.map(c=>String(x[c]))),styles:{fontSize:6},headStyles:{fillColor:[15,41,66]}});d.setFontSize(9);d.text('Prepared By: ____________        Approved By: ____________',10,d.internal.pageSize.height-10);
   r.setHeader('Content-Disposition','attachment; filename=report.pdf');return r.send(Buffer.from(d.output('arraybuffer')));}
  r.json({title,generated:gen,total:rows.length,groupBy:key,summary:sum,rows});}));
-configureDatabase().then(()=>{
- app.listen(4000,()=>console.log('ICS API on :4000'));
-}).catch(error=>{
- console.error('[ICS DATABASE] Startup configuration failed',error);
- process.exit(1);
-});
+const port=Number(process.env.PORT)||4000;
+app.listen(port,'0.0.0.0',()=>console.log(`ICS API on :${port}`));
